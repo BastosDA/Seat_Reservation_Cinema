@@ -45,5 +45,218 @@ Temps estimé : **4p**
 ### 6. À disposition  
 PC de l’école, sans connexion Internet  
 
+# FRS
+## Principal
+CONSTANTES
+  COLONNES <-- 40
+  RANGEES <-- 15
+VARIABLES
+  continuer : Boolean
+  salle : Liste d'entier 2D
+  choix : entier
+
+DEBUT
+  salle <-- [COLONNES][RANGEES]
+
+  initialiserSalle
+  chargerReservation
+
+  continuer <-- true
+  TANT QUE continuer == true
+    Afficher salle
+    Afficher "Menu : "
+    Afficher " 1. Réserver des places"
+    Afficher " 2. Annuler une réservation"
+    Afficher " 3. fficher les statistiques"
+    Afficher " 4. Quitter"
+    choix <-- Saisir
+    SELON QUE choix
+      1 : reserverPlaces
+
+      2 : annulerReservation
+
+      3 : afficherReservation
+
+      4 : continuer <-- false
+
+      Autre : Afficher "Choix invalide"
+    FIN SELON QUE 
+  FIN TANT QUE
+
+  sauvegardeReservations
+  Afficher "Merci d'avoir utilisé notre système de réservation."
+FIN
+
+## initialiserSalle
+CONSTANTES 
+
+VARIABLES
+ j : entier
+ i : entier
+
+DEBUT
+  POUR i  ALLANT DE 0 A COLONNES
+    POUR j ALLANT DE 0 A RANGEES
+      salle[i][j] <-- "L" 
+    FIN POUR
+  FIN POUR
+FIN
+
+## chargerReservations 
+// Restaurer l'état des réservations depuis un fichier
+  static void chargerReservations(char[][] salle) {
+    File file = new File(fileName);
+    if (file.exists()) {
+      try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+        for (int i = 0; i < ROWS; i++) {
+          String line = reader.readLine();
+          for (int j = 0; j < COLS; j++) {
+            salle[i][j] = line.charAt(j);
+          }
+        }
+      } catch (IOException e) {
+        System.out.println("Erreur lors du chargement des réservations : " + e.getMessage());
+      }
+  }
+## afficherSalle
+CONSTANTES 
+
+VARIABLES
+ pReserver : Boolean
+ j : entier
+ i : entier
+
+DEBUT
+  POUR i  ALLANT DE 1 A COLONNES
+    Afficher i, " "
+    POUR j ALLANT DE 1 A RANGEES
+      Afficher salle[i][j], " "
+    FIN POUR
+  FIN POUR
+FIN
+
+## reserverPlaces
+CONSTANTES 
+  COLONNES <-- 40
+  RANGEES <-- 15
+
+VARIABLES
+ nbDePlaces : entier
+ rangees : entier
+ colonnes : entier
+ reserver : Booleen
+
+DEBUT
+  Afficher "Combien de place voulez-vous ?"
+  nbDePlaces <-- Saisir
+  SI nbDePlaces == 1
+    FAIRE
+      Affiher "Reserver une place : 
+      Afficher "Rangées (1 à", RANGEES ,")", " : "
+      rangees <-- Saisir 
+      Afficher "Colonnes (1 à", COLONNES ,")", " : "
+      colonnes <-- Saisir
+      SI (salle[RANGEES][COLONNES] = 'L')
+        salle[RANGEES][COLONNES] <-- 'R'
+        Afficher "Place réservée avec succès."
+        reserver <-- true
+      SINON
+        Afficher "La place est déjà réservée"
+        reserver <-- false
+      FIN SI
+    TANT QUE reserver = false
+  SINON
+    Afficher "Choisir une rangée pour ", nbDePlaces, " entre "
+    rangees <-- Saisir 
+    TANT QUE nbDePlaces > COLONNES
+
+  FIN SI
+FIN
+
+## annulerReservation
+CONSTANTES 
+  COLONNES <-- 40
+  RANGEES <-- 15
+
+VARIABLES
+  nbDePlaces : entier
+  rangees : entier
+  debutColonne : entier
+  valide : booléen
+
+DEBUT
+  Afficher "Combien de places voulez-vous annuler ?"
+  nbDePlaces <-- Saisir
+
+  TANT QUE VRAI FAIRE
+    Afficher "Rangée (1 à", RANGEES, ") : "
+    rangees <-- Saisir
+
+    Afficher "Numéro de la première colonne (1 à", COLONNES - nbDePlaces + 1, ") : "
+    debutColonne <-- Saisir
+
+    // Validation des places réservées
+    valide <-- VRAI
+    POUR i DE 0 A nbDePlaces - 1 FAIRE
+      SI salle[rangees][debutColonne + i] = 'L' ALORS
+        valide <-- FAUX
+        QUITTER BOUCLE
+      FIN SI
+    FIN POUR
+
+    SI valide = VRAI ALORS
+      // Annulation des réservations
+      POUR i DE 0 A nbDePlaces - 1 FAIRE
+        salle[rangees][debutColonne + i] <-- 'L'
+      FIN POUR
+      Afficher "Les", nbDePlaces, "places ont été annulées avec succès."
+      QUITTER la boucle
+    SINON
+      Afficher "Une ou plusieurs places dans le lot ne sont pas réservées. Veuillez entrer une position correcte."
+    FIN SI
+  FIN TANT QUE
+FIN
+
+## afficherReservation
+CONSTANTES 
+
+VARIABLES
+ pReserver : Boolean
+ j : entier
+ i : entier
+
+DEBUT
+  i <-- 0
+  j <-- 0
+  POUR i  ALLANT DE 1 A COLONNES
+    Afficher i, " "
+    POUR j ALLANT DE 1 A RANGEES
+      Afficher salle[i][j], " "
+    FIN POUR
+  FIN POUR
+FIN
+
+## sauvegardeReservations
+// Sauvegarder l'état des réservations dans un fichier
+  static void sauvegarderReservations(char[][] salle) {
+    try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+      for (int i = 0; i < ROWS; i++) {
+        for (int j = 0; j < COLS; j++) {
+          writer.write(salle[i][j]);
+        }
+      writer.newLine();
+      }
+    } catch (IOException e) {
+      System.out.println("Erreur lors de la sauvegarde des réservations : " + e.getMessage());
+    }
+  }
+
+
+
+
+
+
+
+
 
 
